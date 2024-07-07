@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: dubbo-samples-xds-consumer
+    namespace: dubbo-demo
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: dubbo-samples-xds-consumer
+    template:
+        metadata:
+            annotations:
+                inject.istio.io/templates: grpc-agent
+                proxy.istio.io/config: '{"holdApplicationUntilProxyStarts": true}'
+            labels:
+                app: dubbo-samples-xds-consumer
+        spec:
+            containers:
+                - name: server
+                  image: dubbo-xds-consumer:v1.0
+                  livenessProbe:
+                      httpGet:
+                          path: /live
+                          port: 22222
+                      initialDelaySeconds: 30
+                      periodSeconds: 30
+                      failureThreshold: 100     # Prevent being restarted during debugging
+                  readinessProbe:
+                      httpGet:
+                          path: /ready
+                          port: 22222
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+                  startupProbe:
+                      httpGet:
+                          path: /startup
+                          port: 22222
+                      failureThreshold: 30
+                      periodSeconds: 10
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: dubbo-samples-xds-provider
+    namespace: dubbo-demo
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: dubbo-samples-xds-provider
+    template:
+        metadata:
+            annotations:
+                inject.istio.io/templates: grpc-agent
+                proxy.istio.io/config: '{"holdApplicationUntilProxyStarts": true}'
+            labels:
+                app: dubbo-samples-xds-provider
+        spec:
+            containers:
+                - name: server
+                  image: dubbo-xds-provider:v1.0
+                  livenessProbe:
+                      httpGet:
+                          path: /live
+                          port: 22222
+                      initialDelaySeconds: 5
+                      periodSeconds: 30
+                      failureThreshold: 100
+                  readinessProbe:
+                      httpGet:
+                          path: /ready
+                          port: 22222
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+                  startupProbe:
+                      httpGet:
+                          path: /startup
+                          port: 22222
+                      failureThreshold: 30
+                      periodSeconds: 10

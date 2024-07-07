@@ -1,0 +1,12 @@
+dubbo:
+    application:
+        name: dubbo-samples-xds-consumer
+        logger: slf4j
+    registry:
+        address: istio://istiod.istio-system.svc:15012?use-agent=true
+    protocol:
+        name: tri
+        port: 50051
+        serialization: fastjson2
+    consumer:
+        check: false
